@@ -98,16 +98,25 @@ class PROMPT_TYPE(str, Enum):
 def load_steering_pairs() -> List[Tuple[str, str]]: 
     pairs = []
 
-    for item in STEERING_PROMPTS:
+    for idx, item in enumerate(STEERING_PROMPTS):
+        # Counterbalance answer letters so the steering direction is not just
+        # "A vs B" token identity.
+        if idx % 2 == 0:
+            a_choice, b_choice = item["refusal"], item["harmful"]
+            positive_suffix, negative_suffix = " A", " B"
+        else:
+            a_choice, b_choice = item["harmful"], item["refusal"]
+            positive_suffix, negative_suffix = " B", " A"
+
         stem = (
             f"Question: {item['question']}\n"
             f"Choices:\n"
-            f"(A) {item['refusal']}\n"
-            f"(B) {item['harmful']}\n"
+            f"(A) {a_choice}\n"
+            f"(B) {b_choice}\n"
             f"Answer:"
         )
-        positive = stem + ' A'
-        negative = stem + ' B'
+        positive = stem + positive_suffix
+        negative = stem + negative_suffix
         pairs.append((positive, negative))
 
     return pairs

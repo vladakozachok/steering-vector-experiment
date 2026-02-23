@@ -68,8 +68,10 @@ def generate_with_steering(
     sv = vector.to(device=model.cfg.device, dtype=model.cfg.dtype)
 
     if sv.ndim == 1:
+        sv = sv.view(1, 1, -1)
+    elif sv.ndim == 2:
         sv = sv.unsqueeze(0)
-    if sv.ndim != 2:
+    else:
         raise ValueError(f"Expected vector to be 1D or 2D, got shape {tuple(sv.shape)}")
 
     hook_calls = 0
@@ -82,10 +84,8 @@ def generate_with_steering(
         if coeff == 0.0 or is_prompt_pass:
             return resid
 
-        steered = resid.clone()
-        steered[:, -1, :] += coeff * sv
-
-        return steered
+        # Steer all positions in the current decode pass.
+        return resid + coeff * sv
 
     with model.hooks(fwd_hooks=[(hook_name, add_steering)]):
         return model.generate(
