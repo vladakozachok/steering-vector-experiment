@@ -74,17 +74,12 @@ def generate_with_steering(
     else:
         raise ValueError(f"Expected vector to be 1D or 2D, got shape {tuple(sv.shape)}")
 
-    hook_calls = 0
 
     def add_steering(resid: torch.Tensor, hook) -> torch.Tensor:
-        nonlocal hook_calls
-        is_prompt_pass = (hook_calls == 0)
-        hook_calls += 1
 
-        if coeff == 0.0 or is_prompt_pass:
+        if coeff == 0.0 :
             return resid
 
-        # Steer all positions in the current decode pass.
         return resid + coeff * sv
 
     with model.hooks(fwd_hooks=[(hook_name, add_steering)]):
