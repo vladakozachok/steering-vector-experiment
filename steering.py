@@ -38,19 +38,22 @@ def compute_steering_vector(
 
 
 def make_random_direction(ref: torch.Tensor, seed: int = 0, n_samples: int = 10) -> torch.Tensor:
-    ref_flat = ref.reshape(-1)
-    ref_norm_sq = (ref_flat @ ref_flat) + 1e-8
+    ref_cpu = ref.detach().to(device="cpu", dtype=torch.float32)
+    ref_flat = ref_cpu.reshape(-1)
+    ref_norm_sq = (ref_flat @ ref_flat).clamp_min(1e-8)
 
+    g = torch.Generator(device="cpu")
     vectors = []
     for i in range(n_samples):
-        g = torch.Generator(device=ref.device)
         g.manual_seed(seed + i)
-        v = torch.randn(ref.shape, generator=g, device=ref.device, dtype=ref.dtype)
+        v = torch.randn(ref_cpu.shape, generator=g, device="cpu", dtype=torch.float32)
         proj = (v.reshape(-1) @ ref_flat) / ref_norm_sq
-        v = v - proj * ref
-        vectors.append(v / (v.norm() + 1e-8))
+        v = v - proj * ref_cpu
+        vectors.append(v / v.norm().clamp_min(1e-8))
+
     mean_v = torch.stack(vectors).mean(0)
-    return mean_v / (mean_v.norm() + 1e-8)
+    mean_v = mean_v / mean_v.norm().clamp_min(1e-8)
+    return mean_v.to(device=ref.device, dtype=ref.dtype)
 
 
 @torch.inference_mode()
