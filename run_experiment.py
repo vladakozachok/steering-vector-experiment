@@ -24,7 +24,7 @@ def wrap_eval_prompt(prompt: str) -> str:
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser()
     p.add_argument("--model-name", type=str, default="EleutherAI/gpt-j-6b")
-    p.add_argument("--device", type=str, default='auto')
+    p.add_argument("--device", type=str, default='cuda')
     p.add_argument("--layer", type=int, default=14)
     p.add_argument("--hook-point", type=str, default="resid_post")
     p.add_argument("--eval-harmful", type=int, default=50)
