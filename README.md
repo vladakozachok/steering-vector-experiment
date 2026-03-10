@@ -138,7 +138,8 @@ This gives us further confidence in our results. Steering in the opposite direct
 - Replace keyword detection with judge model for refusal identification
 - Try different hook points (resid_mid, attn_out, mlp_out) to localize effect
 - Try steering multiple layers at the same time and see what the result is. 
-- Examine refusal based on category and see if adding more example pairs to the steering improves our result. 
+- Examine refusal based on category and see if adding more example pairs to the steering improves our result.
+- Add logit analysis to examine how the steering vector changes the model's steering preferences.
 ---
 
 ## References
